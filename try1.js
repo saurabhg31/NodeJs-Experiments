@@ -16,7 +16,7 @@ con.connect(function (err) {
   return true;
 });
 
-http.createServer(function (req, res) {
+http.createServer(async function (req, res) {
   console.log('Request received at ' + dt.myDateTime() + ' : http://localhost:' + port + req.url);
   res.writeHead(200, { 'Content-Type': 'application/json' });
   let response = [];
@@ -26,26 +26,26 @@ http.createServer(function (req, res) {
   }
   let queryResult = null;
   if (payload.query) {
-    // con.query(payload.query, function(err, result){
-    //   queryResult = err ? err.sqlMessage : result;
-    //   return true;
-    // });
-    // console.log(queryResult);
-    queryResult = await new Promise((resolve, reject) => {
-      con.query(payload.query, function(err, result) {
+    await new Promise((resolve, reject) => {
+      con.query(payload.query, function (err, result) {
         if (err) {
           reject(err.sqlMessage);
         } else {
           resolve(result);
+          queryResult = result;
         }
       });
+    }).then(result => {
+      queryResult = result
+    }).catch(error => {
+      queryResult = error;
     });
   }
   response.push({
+    'query_result': queryResult,
     'payload': payload,
     'message': 'First attempt at node js, time: ' + dt.myDateTime(),
-    'db': databaseConnectionStatus,
-    'query_result': queryResult
+    'db': databaseConnectionStatus
   });
   res.write(JSON.stringify(response));
   res.end();
