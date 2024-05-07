@@ -1,10 +1,10 @@
 let port = 8080;
-let http = require('http');
-let dt = require('./custom_modules/date_module');
-let url = require('url');
-let uc = require('upper-case');
-let mysql = require('mysql');
-let con = mysql.createConnection({
+import { createServer } from 'http';
+import { myDateTime } from './custom_modules/date_module';
+import { parse } from 'url';
+import { upperCase } from 'upper-case';
+import { createConnection } from 'mysql';
+let con = createConnection({
   host: "localhost",
   user: "root",
   password: "root"
@@ -16,13 +16,13 @@ con.connect(function (err) {
   return true;
 });
 
-http.createServer(async function (req, res) {
-  console.log('Request received at ' + dt.myDateTime() + ' : http://localhost:' + port + req.url);
+createServer(async function (req, res) {
+  console.log('Request received at ' + myDateTime() + ' : http://localhost:' + port + req.url);
   res.writeHead(200, { 'Content-Type': 'application/json' });
   let response = [];
-  let payload = url.parse(req.url, true).query;
+  let payload = parse(req.url, true).query;
   if (payload.month) {
-    payload.month = uc.upperCase(payload.month);
+    payload.month = upperCase(payload.month);
   }
   let queryResult = null;
   if (payload.query) {
@@ -44,10 +44,10 @@ http.createServer(async function (req, res) {
   response.push({
     'query_result': queryResult,
     'payload': payload,
-    'message': 'First attempt at node js, time: ' + dt.myDateTime(),
+    'message': 'First attempt at node js, time: ' + myDateTime(),
     'db': databaseConnectionStatus
   });
   res.write(JSON.stringify(response));
   res.end();
-  console.log('--------------- Request completed at: ' + dt.myDateTime());
+  console.log('--------------- Request completed at: ' + myDateTime());
 }).listen(port);

@@ -1,3 +1,7 @@
-exports.myDateTime = function () {
+const myDateTime = () => {
   return Date();
-};
+}
+
+export {
+  myDateTime
+}
